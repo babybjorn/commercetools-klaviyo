@@ -20,8 +20,7 @@
     "test:integrationDetectOpenHandles": "jest --testPathPattern=src/test/integration --no-cache --detectOpenHandles --runInBand --forceExit",
     "test": "jest --forceExit",
     "test:watch": "npm test -- --watch",
-    "ts-types": " tsc --emitDeclarationOnly --outDir dist",
-    "prepare": "husky install"
+    "ts-types": " tsc --emitDeclarationOnly --outDir dist"
   },
   "devDependencies": {
     "@commercetools/platform-sdk": "^4.7.0",
@@ -43,7 +42,6 @@
     "eslint": "^8.37.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.3",
     "jest": "^29.5.0",
     "jest-mock-extended": "^3.0.4",
     "nock": "^13.3.0",
