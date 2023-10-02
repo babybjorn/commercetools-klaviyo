@@ -23,10 +23,11 @@ app.post('/', async (req, res) => {
         return;
     }
 
-    const message = req.body.message;
-
-    const payload = message.data ? JSON.parse(Buffer.from(message.data, 'base64').toString()) : null;
-    logger.info('Starting event processing...');
+    const payload = req.body.message;
+    // logger.info('message = ', message);
+    // const payload = message ? JSON.parse(message) : null;
+    console.log(payload);
+    logger.info('Starting event processing...', payload);
     try {
         // ProcessEvent is the main entry point for the event processing
         const result = await processEvent(payload as MessageDeliveryPayload, new KlaviyoSdkService());
