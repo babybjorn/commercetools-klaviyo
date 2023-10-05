@@ -4,12 +4,15 @@ import { mapAllowedProperties } from '../../../utils/property-mapper';
 import { Category, CategoryReference, LineItem, Order, Product } from '@commercetools/platform-sdk';
 import { OrderMapper } from './OrderMapper';
 import config from 'config';
-import { CurrencyService } from '../services/CurrencyService';
+import { CustomCurrencyService } from '../services/CustomCurrencyService';
 import { CustomerMapper } from './CustomerMapper';
 import { getLocalizedStringAsText } from '../../../utils/locale-currency-utils';
 
 export class DefaultOrderMapper implements OrderMapper {
-    constructor(private readonly currencyService: CurrencyService, private readonly customerMapper: CustomerMapper) {}
+    constructor(
+        private readonly currencyService: CustomCurrencyService,
+        private readonly customerMapper: CustomerMapper,
+    ) {}
     public mapCtOrderToKlaviyoEvent(
         order: Order,
         orderProducts: Product[],
@@ -112,8 +115,7 @@ export class DefaultOrderMapper implements OrderMapper {
 
     private mapOrderLineItemsToItemNames(order: Order): string[] {
         const lineItemNames = order.lineItems.map((item) => getLocalizedStringAsText(item.name));
-        const customLineItemNames =
-            order.customLineItems?.map((item) => getLocalizedStringAsText(item.name)) || [];
+        const customLineItemNames = order.customLineItems?.map((item) => getLocalizedStringAsText(item.name)) || [];
         return Array.from(new Set(lineItemNames.concat(customLineItemNames)));
     }
 

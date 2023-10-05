@@ -7,7 +7,7 @@ import {
     ProductVariantAvailability,
 } from '@commercetools/platform-sdk';
 import { ProductMapper } from './ProductMapper';
-import { CurrencyService } from '../services/CurrencyService';
+import { CustomCurrencyService } from '../services/CustomCurrencyService';
 import config from 'config';
 import {
     getLocalizedStringAsText,
@@ -19,7 +19,7 @@ import {
 } from '../../../utils/locale-currency-utils';
 
 export class DefaultProductMapper implements ProductMapper {
-    constructor(private readonly currencyService: CurrencyService) {}
+    constructor(private readonly currencyService: CustomCurrencyService) {}
     public mapCtProductToKlaviyoItem(product: Product, update = false): ItemRequest {
         const productName = product.masterData.current.name;
         const productDescription = product.masterData.current.description;

@@ -221,8 +221,7 @@ export class ProductsSync {
     };
 
     private generateProductVariantsJobRequestForKlaviyo = async (product: Product): Promise<KlaviyoEvent[]> => {
-        const combinedVariants = [product.masterData.current.masterVariant]
-            .concat(product.masterData.current.variants);
+        const combinedVariants = [product.masterData.current.masterVariant].concat(product.masterData.current.variants);
         const ctProductVariants = combinedVariants
             .map((v) => v.sku || '')
             .filter((v) => v)
@@ -280,7 +279,7 @@ export class ProductsSync {
             this.klaviyoService.sendEventToKlaviyo({ type: 'itemDeleted', body: e }),
         );
         return klaviyoItemPromises;
-    }
+    };
 
     public async releaseLockExternally(): Promise<void> {
         await this.lockService.releaseLock(this.lockKey);
