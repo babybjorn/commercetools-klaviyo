@@ -5,7 +5,7 @@ import { ProductMapper } from '../shared/mappers/ProductMapper';
 import { KlaviyoService } from '../../infrastructure/driven/klaviyo/KlaviyoService';
 import { isFulfilled, isRejected, isRateLimited } from '../../utils/promise';
 import { ErrorCodes } from '../../types/errors/StatusError';
-import { Product } from '@commercetools/platform-sdk';
+import { Product, ProductVariant } from '@commercetools/platform-sdk';
 import { CtProductService } from '../../infrastructure/driven/commercetools/CtProductService';
 import { getElapsedSeconds, startTime } from '../../utils/time-utils';
 import { groupIntoMaxSizeJobs } from '../../utils/job-grouper';
@@ -44,6 +44,7 @@ export class ProductsSync {
                 itemJobRequests = itemJobRequests.concat(
                     await this.generateProductsJobRequestForKlaviyo(ctProductsResult.data),
                 );
+                console.info('itemJobRequests', itemJobRequests.length);
 
                 variantJobRequests = variantJobRequests.concat(
                     (
@@ -198,23 +199,77 @@ export class ProductsSync {
         const klaviyoItems = (await this.klaviyoService.getKlaviyoItemsByIds(ctPublishedProducts.map((p) => p.id))).map(
             (i) => i.id,
         );
+
         const productsForCreation = ctPublishedProducts.filter(
             (p) => !klaviyoItems.includes(`$custom:::$default:::${p.id}`),
         );
         const productsForUpdate = ctPublishedProducts.filter((p) =>
             klaviyoItems.includes(`$custom:::$default:::${p.id}`),
         );
+
+        let productsForCreationWithPrices: Product[] = [];
+
+        for (let i = 0; i < productsForCreation.length; i++) {
+            let variants: ProductVariant[] = [];
+            for (let j = 0; j < productsForCreation[i].masterData.current.variants.length; j++) {
+                if (
+                    productsForCreation[i].masterData.current.variants[j].prices?.length &&
+                    productsForCreation[i].masterData.current.variants[j].images?.length
+                ) {
+                    variants.push(productsForCreation[i].masterData.current.variants[j]);
+                }
+            }
+            if (variants.length) {
+                productsForCreationWithPrices.push({
+                    ...productsForCreation[i],
+                    masterData: {
+                        ...productsForCreation[i].masterData,
+                        current: {
+                            ...productsForCreation[i].masterData.current,
+                            variants: variants,
+                        },
+                    },
+                });
+            }
+        }
+
+        let productsForUpdateWithPrices: Product[] = [];
+
+        for (let i = 0; i < productsForUpdate.length; i++) {
+            let variants: ProductVariant[] = [];
+            for (let j = 0; j < productsForUpdate[i].masterData.current.variants.length; j++) {
+                if (
+                    productsForUpdate[i].masterData.current.variants[j].prices?.length &&
+                    productsForUpdate[i].masterData.current.variants[j].images?.length
+                ) {
+                    variants.push(productsForUpdate[i].masterData.current.variants[j]);
+                }
+            }
+            if (variants.length) {
+                productsForUpdateWithPrices.push({
+                    ...productsForUpdate[i],
+                    masterData: {
+                        ...productsForUpdate[i].masterData,
+                        current: {
+                            ...productsForUpdate[i].masterData.current,
+                            variants: variants,
+                        },
+                    },
+                });
+            }
+        }
+
         const promises: KlaviyoEvent[] = [];
-        if (productsForCreation.length) {
+        if (productsForCreationWithPrices.length) {
             promises.push({
                 type: 'itemCreated',
-                body: this.productMapper.mapCtProductsToKlaviyoItemJob(productsForCreation, 'itemCreated'),
+                body: this.productMapper.mapCtProductsToKlaviyoItemJob(productsForCreationWithPrices, 'itemCreated'),
             });
         }
-        if (productsForUpdate.length) {
+        if (productsForUpdateWithPrices.length) {
             promises.push({
                 type: 'itemUpdated',
-                body: this.productMapper.mapCtProductsToKlaviyoItemJob(productsForUpdate, 'itemUpdated'),
+                body: this.productMapper.mapCtProductsToKlaviyoItemJob(productsForUpdateWithPrices, 'itemUpdated'),
             });
         }
         return promises;

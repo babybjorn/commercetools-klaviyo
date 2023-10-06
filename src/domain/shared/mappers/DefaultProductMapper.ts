@@ -47,7 +47,9 @@ export class DefaultProductMapper implements ProductMapper {
                     title: getLocalizedStringAsText(productName),
                     description: productDescription ? getLocalizedStringAsText(productDescription) : '',
                     url: productUrl,
-                    image_full_url: productMasterVariantImages ? productMasterVariantImages[0]?.url : undefined,
+                    image_full_url: productMasterVariantImages?.[0]?.url
+                        ? productMasterVariantImages[0]?.url
+                        : undefined,
                     price: productPrice ? this.currencyService.convert(productPrice.amount, productPrice.currency) : 0,
                     custom_metadata: {
                         title_json: JSON.stringify(
@@ -129,7 +131,7 @@ export class DefaultProductMapper implements ProductMapper {
                     description: productDescription ? getLocalizedStringAsText(productDescription) : '',
                     sku: !update ? productVariant.sku : undefined,
                     url: productUrl,
-                    image_full_url: variantImages ? variantImages[0].url : undefined,
+                    image_full_url: variantImages?.[0]?.url ? variantImages[0].url : undefined,
                     inventory_quantity: variantInventoryQuantity ?? 0,
                     inventory_policy: 1,
                     price: variantPrice ? this.currencyService.convert(variantPrice.amount, variantPrice.currency) : 0,
