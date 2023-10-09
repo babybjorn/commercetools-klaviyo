@@ -28,5 +28,5 @@ jobs:
               with:
                   appSourcePath: ${{ github.workspace }}
                   acrName: bbtest89jrj
-                  containerAppName: bb-test-container-app
+                  containerAppName: bb-test-klaviyo-container-app
                   resourceGroup: test-web-rg
