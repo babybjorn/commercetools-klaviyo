@@ -35,10 +35,14 @@ const retryWithExponentialBackoff: RetryWithExponentialBackoff = new RetryWithEx
     numRetries: 5,
     maxInterval: 60,
 });
+
+// Used through instantiation, without passing it as a parameter to other classes/methods.
+// See: https://github.com/klaviyo/klaviyo-api-node/blob/main/README.md#global-api-key
 new GlobalApiKeySettings(process.env.KLAVIYO_AUTH_KEY || '', retryWithExponentialBackoff);
+
 export class KlaviyoSdkService extends KlaviyoService {
     public async sendEventToKlaviyo(event: KlaviyoEvent): Promise<any> {
-        logger.info('Sending event to Klaviyo', { zdata: event.body });
+        logger.info(`Sending event of type ${event.type} to Klaviyo`);
         switch (event.type) {
             case 'event':
                 return Events.createEvent(event.body);
@@ -70,7 +74,7 @@ export class KlaviyoSdkService extends KlaviyoService {
     }
 
     public async sendJobRequestToKlaviyo(event: KlaviyoEvent): Promise<any> {
-        logger.info('Sending job request in Klaviyo', { zdata: event.body });
+        logger.info(`Sending job request to Klaviyo with type ${event.type}`);
         switch (event.type) {
             case 'itemCreated':
                 return this.spawnCreateJob(event.body, event.type);
@@ -92,11 +96,9 @@ export class KlaviyoSdkService extends KlaviyoService {
         try {
             const filter = `equals(external_id,"${externalId}")`;
             const profiles = await Profiles.getProfiles({ filter });
-            logger.debug('Profiles response', profiles);
             const profile = profiles?.body.data?.find(
                 (profile: GetProfileResponseData) => profile.attributes.externalId === externalId,
             );
-            logger.debug('Profile', profile);
             return profile;
         } catch (e) {
             logger.error(`Error getting profile in Klaviyo with externalId ${externalId}`);
@@ -148,10 +150,9 @@ export class KlaviyoSdkService extends KlaviyoService {
             `Invalid phone number when ${
                 create ? 'creating' : 'updating'
             } profile. Retrying after removing phone number from profile...`,
-            e.response?.data,
         );
 
-        const modifiedBody: any = {
+        const modifiedBody = {
             data: {
                 ...body.data,
                 attributes: {
@@ -168,7 +169,7 @@ export class KlaviyoSdkService extends KlaviyoService {
                 `Error ${
                     create ? 'creating' : 'updating'
                 } profile in Klaviyo after removing phone_number. Response code ${error.status}, ${error.message}`,
-                error.response?.data || error,
+                error,
             );
             throw error;
         }
