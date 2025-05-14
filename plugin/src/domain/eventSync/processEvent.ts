@@ -30,6 +30,7 @@ import { DefaultCtPaymentService } from '../../infrastructure/driven/commercetoo
 import { DefaultCtOrderService } from '../../infrastructure/driven/commercetools/DefaultCtOrderService';
 import { InventoryResourceUpdatedEventProcessor } from './eventProcessors/inventory/inventoryResourceUpdatedEventProcessor';
 import { ProductPublishedEventProcessor } from './eventProcessors/product/productPublishedEventProcessor';
+import { ProcessingResult } from '../../types/klaviyo-plugin';
 
 const context: Context = {
     klaviyoService: new KlaviyoSdkService(),
@@ -44,7 +45,6 @@ const context: Context = {
     ctOrderService: new DefaultCtOrderService(getApiRoot()),
 };
 
-// export const processEvent = (ctMessage: CloudEventsFormat | PlatformFormat) => {
 const defaultProcessors: (typeof AbstractEventProcessor)[] = [
     CustomerCreatedEventProcessor,
     CustomerCompanyNameSetEventProcessor,
@@ -61,25 +61,12 @@ const defaultProcessors: (typeof AbstractEventProcessor)[] = [
     ProductPublishedEventProcessor,
 ];
 
-// class CTEventsProcessor {
-//     constructor(private readonly klaviyoService: KlaviyoService, private readonly eventProcessors: (typeof AbstractEventProcessor)[]) {
-//     }
-//
-//     public async processEvent(ctMessage: MessageDeliveryPayload): Promise<ProcessingResult> {
-//         return Promise.resolve({
-//             status: 'OK',
-//         });
-//     }
-// }
-
-//todo move processEvent to class
 export const processEvent = async (
     ctMessage: MessageDeliveryPayload,
     klaviyoService: KlaviyoService,
     eventProcessors: (typeof AbstractEventProcessor)[] = defaultProcessors,
 ): Promise<ProcessingResult> => {
-    // todo check ctMessage.payloadNotIncluded;
-    logger.info('Processing commercetools message', ctMessage);
+    logger.info(`Processing commercetools message with id ${ctMessage.id}`);
     const klaviyoRequestsPromises = await Promise.allSettled(
         eventProcessors
             .map((eventProcessors) => eventProcessors.instance(ctMessage, context))

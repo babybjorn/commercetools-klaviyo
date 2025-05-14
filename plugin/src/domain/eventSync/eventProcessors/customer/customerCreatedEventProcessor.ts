@@ -1,6 +1,7 @@
 import { AbstractEventProcessor } from '../abstractEventProcessor';
 import logger from '../../../../utils/log';
 import { Customer, CustomerCreatedMessage } from '@commercetools/platform-sdk';
+import { KlaviyoEvent } from '../../../../types/klaviyo-plugin';
 
 export class CustomerCreatedEventProcessor extends AbstractEventProcessor {
     private readonly PROCESSOR_NAME = 'CustomerCreated';
@@ -26,7 +27,7 @@ export class CustomerCreatedEventProcessor extends AbstractEventProcessor {
         } else {
             customer = (await this.context.ctCustomerService.getCustomerProfile(
                 (message as CustomerCreatedMessage).resource.id,
-            )) as Customer;
+            ));
         }
 
         const klaviyoEvent: KlaviyoEvent = {

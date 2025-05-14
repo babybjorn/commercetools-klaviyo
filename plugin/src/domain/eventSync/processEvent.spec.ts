@@ -5,13 +5,12 @@ import { expect as exp } from 'chai';
 import { responseHandler } from './responseHandler';
 import mocked = jest.mocked;
 import { KlaviyoService } from "../../infrastructure/driven/klaviyo/KlaviyoService";
+import { KlaviyoEvent } from '../../types/klaviyo-plugin';
 
 jest.mock('../../infrastructure/driven/klaviyo/KlaviyoSdkService');
 jest.mock('./responseHandler');
 
 describe('processEvent', () => {
-    //todo mock api call to create klaviyo client
-
     class TestEvent extends AbstractEventProcessor {
         generateKlaviyoEvents(): Promise<KlaviyoEvent[]> {
             return Promise.resolve([
